@@ -14,6 +14,7 @@
 		3A4A7007242D084D00F9AF97 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3A4A7005242D084D00F9AF97 /* Main.storyboard */; };
 		3A4A7009242D084F00F9AF97 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A4A7008242D084F00F9AF97 /* Assets.xcassets */; };
 		3A4A700C242D084F00F9AF97 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3A4A700A242D084F00F9AF97 /* LaunchScreen.storyboard */; };
+		3A4A7019242D0BC700F9AF97 /* simpsons.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A4A7018242D0BC700F9AF97 /* simpsons.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		3A4A7008242D084F00F9AF97 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3A4A700B242D084F00F9AF97 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3A4A700D242D084F00F9AF97 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3A4A7018242D0BC700F9AF97 /* simpsons.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = simpsons.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 		3A4A6FFC242D084D00F9AF97 /* TheSimpsonsApp */ = {
 			isa = PBXGroup;
 			children = (
+				3A4A7015242D0B4D00F9AF97 /* Mock */,
 				3A4A7014242D08BE00F9AF97 /* Controllers */,
 				3A4A7013242D08B100F9AF97 /* Models */,
 				3A4A6FFD242D084D00F9AF97 /* AppDelegate.swift */,
@@ -84,6 +87,14 @@
 				3A4A7003242D084D00F9AF97 /* DetailViewController.swift */,
 			);
 			path = Controllers;
+			sourceTree = "<group>";
+		};
+		3A4A7015242D0B4D00F9AF97 /* Mock */ = {
+			isa = PBXGroup;
+			children = (
+				3A4A7018242D0BC700F9AF97 /* simpsons.json */,
+			);
+			path = Mock;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -145,6 +156,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3A4A700C242D084F00F9AF97 /* LaunchScreen.storyboard in Resources */,
+				3A4A7019242D0BC700F9AF97 /* simpsons.json in Resources */,
 				3A4A7009242D084F00F9AF97 /* Assets.xcassets in Resources */,
 				3A4A7007242D084D00F9AF97 /* Main.storyboard in Resources */,
 			);
