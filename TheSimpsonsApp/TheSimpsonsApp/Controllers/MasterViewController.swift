@@ -11,18 +11,22 @@ import UIKit
 class MasterViewController: UITableViewController {
 
     var detailViewController: DetailViewController? = nil
-    var objects = [Any]()
-
+    var objects: [RelatedTopic] = [RelatedTopic]()
+    
+    let cellId = "char_cell"
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-
         if let split = splitViewController {
             let controllers = split.viewControllers
             detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
         }
-     
+        
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 200
+        
+        tableView.register(CharCell.self, forCellReuseIdentifier: cellId)
+
         if let data = SimpsonResponse().loadJson(filename: "simpsons")?.RelatedTopics {
             objects = data
         }
@@ -38,7 +42,7 @@ class MasterViewController: UITableViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail" {
             if let indexPath = tableView.indexPathForSelectedRow {
-                let object = NSDate()//objects[indexPath.row] as! NSDate
+                let object = NSDate() //objects[indexPath.row] as! NSDate
                 let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
                 controller.detailItem = object
                 controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
@@ -59,9 +63,11 @@ class MasterViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "char_cell", for: indexPath)
-
-        cell.textLabel!.text = "This is a test: \(indexPath.row)"
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! CharCell
+        
+        // cell.textLabel!.text = "This is a test: \(indexPath.row)"
+        cell.charInfo = objects[indexPath.row]
+        
         return cell
     }
 
