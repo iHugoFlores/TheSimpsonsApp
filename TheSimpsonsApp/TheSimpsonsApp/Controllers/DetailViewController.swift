@@ -34,17 +34,11 @@ class DetailViewController: UIViewController {
         return lbl
     }()
 
-    var charInfo: RelatedTopic? {
+    var charInfo: Character? {
         didSet {
             nameLabel.text = charInfo?.charName
             descriptionLabel.text = charInfo?.charDescription
-            if (charInfo?.Icon.URL.isEmpty)! {
-                charImage.backgroundColor = .clear
-                charImage.image = UIImage(imageLiteralResourceName: "user")
-            } else {
-                charImage.backgroundColor = .blue
-                charImage.image = nil
-            }
+            charImage.image = UIImage(data: (charInfo?.imageData)!)
         }
     }
 
