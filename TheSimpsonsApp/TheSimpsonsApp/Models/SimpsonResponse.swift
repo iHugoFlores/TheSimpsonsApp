@@ -75,6 +75,9 @@ class Character: NSCoder, NSCoding {
 }
 
 class SimpsonResponse {
+    static let endpoint = "http://api.duckduckgo.com/?q=simpsons+characters&format=json"
+    static let staticJson = "simpsons"
+    
     static func loadJson(filename fileName: String) -> MainResponse? {
         if let url = Bundle.main.url(forResource: fileName, withExtension: "json") {
             do {
@@ -103,14 +106,51 @@ class SimpsonResponse {
         return getMockData()
     }
     
+    static func getData(onDone handler: @escaping ([Character]?) -> ()) {
+        do {
+            // Try to load from persistence
+            let res = try [Character].readFromPersistence()
+            DispatchQueue.main.async() {
+                print("Reading from storage")
+                handler(res)
+            }
+        } catch let error as NSError {
+            if error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError {
+                NSLog("No persistence file found, not necesserially an error...")
+            } else {
+                NSLog("Error loading from persistence: \(error.localizedDescription)")
+            }
+            downloadJsonData(fromURL: URL(string: endpoint)!, onDone: handler)
+        }
+    }
+    
     static func downloadData() -> [Character]? {
         return getMockData()
     }
     
     static func getMockData() -> [Character]? {
-        let stored: [RelatedTopic] = loadJson(filename: "simpsons")!.RelatedTopics
+        let stored: [RelatedTopic] = loadJson(filename: staticJson)!.RelatedTopics
         return stored.map{ rt in
             Character(charName: rt.charName, charDescription: rt.charDescription, imageURL: rt.Icon.URL, imageData: nil)
+        }
+    }
+    
+    static func downloadJsonData(fromURL url: URL, onDone doneHandler: @escaping ([Character]?) -> ()) {
+        downloadData(from: url) { data, response, error in
+            guard let data = data, error == nil else { return }
+            do {
+                let mainResponse : MainResponse = try JSONDecoder().decode(MainResponse.self, from: data)
+                let res = mainResponse.RelatedTopics.map{ rt in
+                    Character(charName: rt.charName, charDescription: rt.charDescription, imageURL: rt.Icon.URL, imageData: nil)
+                }
+                DispatchQueue.main.async() {
+                    doneHandler(res)
+                }
+            } catch {
+                DispatchQueue.main.async() {
+                    doneHandler(nil)
+                }
+            }
         }
     }
     
