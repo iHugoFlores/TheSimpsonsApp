@@ -8,15 +8,17 @@
 
 import UIKit
 
-class MasterViewController: UITableViewController {
-
+class MasterViewController: UITableViewController, CharCellDelegate {
     var detailViewController: DetailViewController? = nil
-    var objects: [RelatedTopic] = [RelatedTopic]()
+
+    var objects: [Character] = [Character]()
     
     let cellId = "char_cell"
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+
         if let split = splitViewController {
             let controllers = split.viewControllers
             detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
@@ -25,10 +27,24 @@ class MasterViewController: UITableViewController {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 200
         
+        addReDownloadButton()
+        
         // tableView.register(CharCell.self, forCellReuseIdentifier: cellId)
 
-        if let data = SimpsonResponse().loadJson(filename: "simpsons")?.RelatedTopics {
+        if let data = SimpsonResponse.getData() {
             objects = data
+        }
+    }
+    
+    func addReDownloadButton() {
+        let addButton = UIBarButtonItem(title: "Refresh", style: .done, target: self, action: #selector(onRefreshPressed))
+        navigationItem.rightBarButtonItem = addButton
+    }
+    
+    @objc func onRefreshPressed() {
+        if let data = SimpsonResponse.downloadData() {
+            objects = data
+            self.tableView.reloadData()
         }
     }
 
@@ -66,6 +82,8 @@ class MasterViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! CharCell
         
         // cell.textLabel!.text = "This is a test: \(indexPath.row)"
+        cell.indexPath = indexPath
+        cell.delegate = self
         cell.charInfo = objects[indexPath.row]
         
         return cell
@@ -80,11 +98,24 @@ class MasterViewController: UITableViewController {
         if editingStyle == .delete {
             objects.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
+            saveAllCharData()
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
         }
     }
 
+    func setCharImage(indexPath: IndexPath, image: Data?) {
+        objects[indexPath.row].imageData = image
+        saveAllCharData()
+    }
+    
+    func saveAllCharData() {
+        do {
+            try objects.writeToPersistence()
+        } catch let error {
+            NSLog("Error writing to persistence: \(error)")
+        }
+    }
 
 }
 
