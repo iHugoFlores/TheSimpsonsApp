@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 struct Icon: Decodable {
     enum Category: String, Decodable {
@@ -53,6 +54,19 @@ class SimpsonResponse {
             }
         }
         return nil
+    }
+    
+    static func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
+        URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
+    }
+    
+    static func downloadImage(fromURL url: URL, onDone doneHandler: @escaping (UIImage?) -> ()) {
+        getData(from: url) { data, response, error in
+            guard let data = data, error == nil else { return }
+            DispatchQueue.main.async() {
+                doneHandler(UIImage(data: data))
+            }
+        }
     }
     
     func createDummyData() -> MainResponse {
