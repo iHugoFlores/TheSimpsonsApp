@@ -8,16 +8,31 @@
 
 import UIKit
 
+protocol CharCellDelegate {
+    func setCharImage(indexPath: IndexPath, image: Data?)
+}
+
 class CharCell: UITableViewCell {
     
-    var charInfo: RelatedTopic? {
+    var tableView:UITableView? {
+        return superview as? UITableView
+    }
+    
+    var charInfo: Character? {
         didSet {
             nameLabel.text = charInfo?.charName
-            if (charInfo?.Icon.URL.isEmpty)! {
-                setPlaceholderImage()
-            } else {
-                downloadImage()
+            
+            if let imgData = charInfo?.imageData {
+                charImage.image = UIImage(data: imgData)
+                return
             }
+
+            if (charInfo?.imageURL.isEmpty)! {
+                setPlaceholderImage()
+                return
+            }
+
+            downloadImage()
         }
     }
     
@@ -37,6 +52,10 @@ class CharCell: UITableViewCell {
     }()
     
     var vSpinner : UIView?
+    
+    var delegate: CharCellDelegate?
+    
+    var indexPath: IndexPath?
     
     /*
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -88,22 +107,25 @@ class CharCell: UITableViewCell {
     }
     
     func setPlaceholderImage() {
-        charImage.backgroundColor = .clear
         charImage.image = UIImage(imageLiteralResourceName: "user")
+        delegate?.setCharImage(indexPath: indexPath!, image: charImage.image?.jpegData(compressionQuality: 1.0))
     }
     
     func downloadImage() {
         setImageSpinner()
-        SimpsonResponse.downloadImage(fromURL: URL(string: (charInfo?.Icon.URL)!)!, onDone: self.setDownloadedImage)
+        SimpsonResponse.downloadImage(fromURL: URL(string: (charInfo?.imageURL)!)!, onDone: self.setDownloadedImage)
     }
     
-    func setDownloadedImage(image img: UIImage?) {
+    func setDownloadedImage(image imgData: Data?) {
         removeSpinner()
+        charImage.backgroundColor = .clear
+        let img = UIImage(data: imgData!)
         if (img?.size.height)! <= 1.0 {
             setPlaceholderImage()
             return
         }
         charImage.image = img
+        delegate?.setCharImage(indexPath:  indexPath!, image: imgData)
     }
     
     func setImageSpinner() {
