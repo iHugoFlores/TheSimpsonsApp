@@ -38,6 +38,7 @@ class CharCell: UITableViewCell {
         return imgView
     }()
     
+    /*
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setUICell()
@@ -45,6 +46,11 @@ class CharCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+    */
+    
+    override func awakeFromNib() {
+        setUICell()
     }
     
     func setUICell() {
@@ -56,6 +62,7 @@ class CharCell: UITableViewCell {
         charImage.translatesAutoresizingMaskIntoConstraints = false
         
         addSubview(charImage)
+
         let margins = self.layoutMarginsGuide
         NSLayoutConstraint.activate([
             charImage.leadingAnchor.constraint(equalTo: margins.leadingAnchor),
@@ -77,12 +84,6 @@ class CharCell: UITableViewCell {
             nameLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             nameLabel.leadingAnchor.constraint(equalTo: charImage.trailingAnchor, constant: margins.right),
             nameLabel.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor)
-            /*
-            nameLabel.topAnchor.constraint(equalTo: margins.topAnchor),
-             nameLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 18),
-             nameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 18),
-             nameLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: 18)
-            */
         ])
     }
     
