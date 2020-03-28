@@ -30,10 +30,13 @@ class MasterViewController: UITableViewController, CharCellDelegate {
         addReDownloadButton()
         
         // tableView.register(CharCell.self, forCellReuseIdentifier: cellId)
-
-        if let data = SimpsonResponse.getData() {
-            objects = data
-        }
+        
+        SimpsonResponse.getData(onDone: setApiData(data:))
+    }
+    
+    func setApiData(data: [Character]?) -> Void {
+        objects = data!
+        tableView.reloadData()
     }
     
     func addReDownloadButton() {
@@ -42,10 +45,7 @@ class MasterViewController: UITableViewController, CharCellDelegate {
     }
     
     @objc func onRefreshPressed() {
-        if let data = SimpsonResponse.downloadData() {
-            objects = data
-            self.tableView.reloadData()
-        }
+        SimpsonResponse.downloadJsonData(fromURL: URL(string: SimpsonResponse.endpoint)!, onDone: setApiData(data:))
     }
 
     override func viewWillAppear(_ animated: Bool) {
