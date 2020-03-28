@@ -22,6 +22,7 @@ struct RelatedTopic: Decodable {
         case swift, combine, debugging, xcode
     }
 
+    var charImg: Data?
     var charName: String {
         return self.Text.components(separatedBy: " - ")[0]
     }
@@ -41,8 +42,40 @@ struct MainResponse: Decodable {
     let RelatedTopics: [RelatedTopic]
 }
 
+class Character: NSCoder, NSCoding {
+    var charName: String
+    var charDescription: String
+    var imageURL: String
+    var imageData: Data?
+
+    func encode(with coder: NSCoder) {
+        coder.encode(charName, forKey: "charName")
+        coder.encode(charDescription, forKey: "charDescription")
+        coder.encode(imageURL, forKey: "imageURL")
+        coder.encode(imageData, forKey: "imageData")
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        if  let charName = aDecoder.decodeObject(forKey: "charName") as? String,
+            let charDescription = aDecoder.decodeObject(forKey: "charDescription") as? String,
+            let imageURL = aDecoder.decodeObject(forKey: "imageURL") as? String {
+            self.charName = charName
+            self.charDescription = charDescription
+            self.imageURL = imageURL
+            self.imageData = aDecoder.decodeObject(forKey: "imageData") as? Data
+        } else { return nil }
+    }
+    
+    init(charName: String, charDescription: String, imageURL: String, imageData: Data?) {
+        self.charName = charName
+        self.charDescription = charDescription
+        self.imageURL = imageURL
+        self.imageData = imageData
+    }
+}
+
 class SimpsonResponse {
-    func loadJson(filename fileName: String) -> MainResponse? {
+    static func loadJson(filename fileName: String) -> MainResponse? {
         if let url = Bundle.main.url(forResource: fileName, withExtension: "json") {
             do {
                 let data = try Data(contentsOf: url)
@@ -56,25 +89,77 @@ class SimpsonResponse {
         return nil
     }
     
-    static func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
-        URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
+    static func getData() -> [Character]? {
+        do {
+            // Try to load from persistence
+            return try [Character].readFromPersistence()
+        } catch let error as NSError {
+            if error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError {
+                NSLog("No persistence file found, not necesserially an error...")
+            } else {
+                NSLog("Error loading from persistence: \(error.localizedDescription)")
+            }
+        }
+        return getMockData()
     }
     
-    static func downloadImage(fromURL url: URL, onDone doneHandler: @escaping (UIImage?) -> ()) {
-        getData(from: url) { data, response, error in
-            guard let data = data, error == nil else { return }
-            DispatchQueue.main.async() {
-                doneHandler(UIImage(data: data))
-            }
+    static func downloadData() -> [Character]? {
+        return getMockData()
+    }
+    
+    static func getMockData() -> [Character]? {
+        let stored: [RelatedTopic] = loadJson(filename: "simpsons")!.RelatedTopics
+        return stored.map{ rt in
+            Character(charName: rt.charName, charDescription: rt.charDescription, imageURL: rt.Icon.URL, imageData: nil)
         }
     }
     
-    func createDummyData() -> MainResponse {
-        let data = [
-            RelatedTopic(Text: "Apu Nahasapeemapetilon - Apu Nahasapeemapetilon is a recurring character in the animated TV series The Simpsons. He is an Indian-American immigrant proprietor who runs the Kwik-E-Mart, a popular convenience store in Springfield, and is best known for his catchphrase, \"Thank you, come again.\"", Icon: Icon(URL: "https://duckduckgo.com/i/99b04638.png")),
-            RelatedTopic(Text: "Barney Gumble - Barnard Arnold \"Barney\" Gumble is a recurring character in the American animated TV series The Simpsons. He is voiced by Dan Castellaneta and first appeared in the series premiere episode \"Simpsons Roasting on an Open Fire\". Barney is the town drunk of Springfield and Homer Simpson's best friend.", Icon: Icon(URL: "")),
-            RelatedTopic(Text: "Bart Simpson - Bartholomew JoJo Simpson is a fictional character in the American animated television series The Simpsons and part of the Simpson family. He is voiced by Nancy Cartwright and first appeared on television in The Tracey Ullman Show short \"Good Night\" on April 19, 1987.", Icon: Icon(URL: "https://duckduckgo.com/i/39ce98c0.png"))]
-        let res = MainResponse(Heading: "Some Header", RelatedTopics: data);
-        return res;
+    static func downloadData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
+        URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
+    }
+    
+    static func downloadImage(fromURL url: URL, onDone doneHandler: @escaping (Data?) -> ()) {
+        downloadData(from: url) { data, response, error in
+            guard let data = data, error == nil else { return }
+            DispatchQueue.main.async() {
+                doneHandler(data)
+            }
+        }
+    }
+}
+
+extension Collection where Iterator.Element == Character {
+    private static func persistencePath() -> URL? {
+        let url = try? FileManager.default.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true)
+
+        return url?.appendingPathComponent("simpsonsData.bin")
+    }
+    
+    // Write the array to persistence
+    func writeToPersistence() throws {
+        print("Wiriting items to storage")
+        if let url = Self.persistencePath(), let array = self as? NSArray {
+            let data = NSKeyedArchiver.archivedData(withRootObject: array)
+            try data.write(to: url)
+        } else {
+            throw NSError(domain: "com.example.MyToDo", code: 10, userInfo: nil)
+        }
+    }
+    
+    // Read the array from persistence
+    static func readFromPersistence() throws -> [Character] {
+        if let url = persistencePath(), let data = (try Data(contentsOf: url) as Data?) {
+            if let array = NSKeyedUnarchiver.unarchiveObject(with: data) as? [Character] {
+                return array
+            } else {
+                throw NSError(domain: "com.example.MyToDo", code: 11, userInfo: nil)
+            }
+        } else  {
+            throw NSError(domain: "com.example.MyToDo", code: 12, userInfo: nil)
+        }
     }
 }
