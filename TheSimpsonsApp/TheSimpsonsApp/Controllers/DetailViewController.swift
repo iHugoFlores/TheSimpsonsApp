@@ -9,32 +9,99 @@
 import UIKit
 
 class DetailViewController: UIViewController {
+    
+    lazy private var charImage : UIImageView = {
+        let imgView = UIImageView()
+        imgView.contentMode = .scaleAspectFit
+        return imgView
+    }()
+    
+    lazy private var nameLabel : UILabel = {
+        let lbl = UILabel()
+        lbl.textColor = .black
+        lbl.font = UIFont.boldSystemFont(ofSize: 24)
+        lbl.textAlignment = .center
+        lbl.numberOfLines = 0
+        return lbl
+    }()
+    
+    lazy private var descriptionLabel : UILabel = {
+        let lbl = UILabel()
+        lbl.textColor = .black
+        lbl.font = UIFont.boldSystemFont(ofSize: 16)
+        lbl.textAlignment = .left
+        lbl.numberOfLines = 0
+        return lbl
+    }()
 
-    @IBOutlet weak var detailDescriptionLabel: UILabel!
-
-
-    func configureView() {
-        // Update the user interface for the detail item.
-        if let detail = detailItem {
-            if let label = detailDescriptionLabel {
-                label.text = detail.description
+    var charInfo: RelatedTopic? {
+        didSet {
+            nameLabel.text = charInfo?.charName
+            descriptionLabel.text = charInfo?.charDescription
+            if (charInfo?.Icon.URL.isEmpty)! {
+                charImage.backgroundColor = .clear
+                charImage.image = UIImage(imageLiteralResourceName: "user")
+            } else {
+                charImage.backgroundColor = .blue
+                charImage.image = nil
             }
         }
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
         configureView()
     }
+    
+    func configureView() {
+        setCharImage()
+        setNameLabel()
+        setDescriptionLabel()
+        title = "Character"
+    }
+    
+    func setCharImage() {
+        charImage.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(charImage)
 
-    var detailItem: NSDate? {
-        didSet {
-            // Update the view.
-            configureView()
-        }
+        let margins = view.layoutMarginsGuide
+        NSLayoutConstraint.activate([
+            charImage.topAnchor.constraint(greaterThanOrEqualToSystemSpacingBelow: margins.topAnchor, multiplier: 2.0),
+            charImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            charImage.widthAnchor.constraint(equalToConstant: 200),
+            charImage.heightAnchor.constraint(equalToConstant: 200)
+        ])
+    }
+    
+    func setNameLabel() {
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(nameLabel)
+        
+        let margins = charImage.layoutMargins
+        let viewMargins = view.layoutMarginsGuide
+        NSLayoutConstraint.activate([
+            nameLabel.topAnchor.constraint(equalTo: charImage.bottomAnchor, constant: margins.bottom),
+            nameLabel.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor),
+            nameLabel.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor)
+        ])
     }
 
+    func setDescriptionLabel() {
+        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(descriptionLabel)
+        
+        let margins = nameLabel.layoutMargins
+        let viewMargins = view.layoutMarginsGuide
+        NSLayoutConstraint.activate([
+            descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: margins.bottom),
+            descriptionLabel.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor),
+            descriptionLabel.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor)
+        ])
+    }
 
 }
 
