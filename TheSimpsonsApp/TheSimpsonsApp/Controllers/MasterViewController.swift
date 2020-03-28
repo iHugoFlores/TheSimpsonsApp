@@ -25,7 +25,7 @@ class MasterViewController: UITableViewController {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 200
         
-        tableView.register(CharCell.self, forCellReuseIdentifier: cellId)
+        // tableView.register(CharCell.self, forCellReuseIdentifier: cellId)
 
         if let data = SimpsonResponse().loadJson(filename: "simpsons")?.RelatedTopics {
             objects = data
@@ -42,9 +42,9 @@ class MasterViewController: UITableViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showDetail" {
             if let indexPath = tableView.indexPathForSelectedRow {
-                let object = NSDate() //objects[indexPath.row] as! NSDate
+                let object = objects[indexPath.row]
                 let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
-                controller.detailItem = object
+                controller.charInfo = object
                 controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
                 controller.navigationItem.leftItemsSupplementBackButton = true
                 detailViewController = controller
