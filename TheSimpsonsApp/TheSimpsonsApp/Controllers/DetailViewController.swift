@@ -10,14 +10,32 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
+    let scrollView: UIScrollView = {
+        let v = UIScrollView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
+    
+    let scrollViewContainer: UIStackView = {
+        let view = UIStackView()
+
+        view.axis = .vertical
+        view.spacing = 20
+
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     lazy private var charImage : UIImageView = {
         let imgView = UIImageView()
+        imgView.translatesAutoresizingMaskIntoConstraints = false
         imgView.contentMode = .scaleAspectFit
         return imgView
     }()
     
     lazy private var nameLabel : UILabel = {
         let lbl = UILabel()
+        lbl.translatesAutoresizingMaskIntoConstraints = false
         lbl.textColor = .black
         lbl.font = UIFont.boldSystemFont(ofSize: 24)
         lbl.textAlignment = .center
@@ -27,6 +45,7 @@ class DetailViewController: UIViewController {
     
     lazy private var descriptionLabel : UILabel = {
         let lbl = UILabel()
+        lbl.translatesAutoresizingMaskIntoConstraints = false
         lbl.textColor = .black
         lbl.font = UIFont.boldSystemFont(ofSize: 16)
         lbl.textAlignment = .left
@@ -48,52 +67,62 @@ class DetailViewController: UIViewController {
     }
     
     func configureView() {
+        configureScrollView()
         setCharImage()
         setNameLabel()
         setDescriptionLabel()
         title = "Character"
     }
     
-    func setCharImage() {
-        charImage.translatesAutoresizingMaskIntoConstraints = false
+    func configureScrollView() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(scrollViewContainer)
         
-        view.addSubview(charImage)
-
-        let margins = view.layoutMarginsGuide
         NSLayoutConstraint.activate([
-            charImage.topAnchor.constraint(greaterThanOrEqualToSystemSpacingBelow: margins.topAnchor, multiplier: 2.0),
-            charImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            scrollView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            scrollView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            charImage.widthAnchor.constraint(equalToConstant: 200),
-            charImage.heightAnchor.constraint(equalToConstant: 200)
+            scrollViewContainer.leftAnchor.constraint(equalTo: scrollView.leftAnchor),
+            scrollViewContainer.rightAnchor.constraint(equalTo: scrollView.rightAnchor),
+            scrollViewContainer.topAnchor.constraint(greaterThanOrEqualTo: scrollView.topAnchor, constant: 16.0),
+            scrollViewContainer.bottomAnchor.constraint(lessThanOrEqualTo: scrollView.bottomAnchor, constant: -16.0),
+
+            scrollViewContainer.widthAnchor.constraint(equalTo: view.widthAnchor)
+        ])
+    }
+    
+    func setCharImage() {
+        scrollViewContainer.addArrangedSubview(charImage)
+
+        NSLayoutConstraint.activate([
+            charImage.widthAnchor.constraint(equalToConstant: 250),
+            charImage.heightAnchor.constraint(equalToConstant: 250)
         ])
     }
     
     func setNameLabel() {
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        view.addSubview(nameLabel)
+        scrollViewContainer.addArrangedSubview(nameLabel)
         
         let margins = charImage.layoutMargins
-        let viewMargins = view.layoutMarginsGuide
+        let viewMargins = scrollView.layoutMarginsGuide
         NSLayoutConstraint.activate([
-            nameLabel.topAnchor.constraint(equalTo: charImage.bottomAnchor, constant: margins.bottom),
+            nameLabel.topAnchor.constraint(equalTo: charImage.bottomAnchor, constant: margins.bottom * 6),
             nameLabel.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor),
             nameLabel.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor)
         ])
     }
 
     func setDescriptionLabel() {
-        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        view.addSubview(descriptionLabel)
+        scrollViewContainer.addArrangedSubview(descriptionLabel)
         
         let margins = nameLabel.layoutMargins
-        let viewMargins = view.layoutMarginsGuide
+        let viewMargins = scrollView.layoutMarginsGuide
         NSLayoutConstraint.activate([
             descriptionLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: margins.bottom),
-            descriptionLabel.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor),
-            descriptionLabel.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor)
+            descriptionLabel.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor, constant: scrollView.layoutMargins.left * 3),
+            descriptionLabel.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor, constant: scrollView.layoutMargins.right * -3)
         ])
     }
 
